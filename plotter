@@ -1,0 +1,101 @@
+import matplotlib.pyplot as plt
+#Given data
+flow_rate_new = [0.0000, 0.4424, 0.8847, 1.3271, 1.7695, 2.2118, 2.6542, 
+                 3.0828, 3.525, 3.9675, 4.4099, 4.8522, 5.2946]  # Q values
+head_new = [393.629, 406.782, 415.237, 419.934, 410.539, 406.782, 393.629, 
+            378.598, 362.628, 335.383, 306.261, 262.106, 218.892]  # Head values
+efficiency_new = [0, 13, 25, 35, 44, 48, 51, 53, 54, 55, 53, 50, 45]  # Efficiency (%)
+total_head_loss_new = [100.000, 100.947, 103.410, 107.236, 112.361, 118.740, 
+                       126.346, 134.859, 144.812, 155.931, 168.205, 181.620, 196.165976]  # Total head loss
+
+#Plot
+fig, ax1 = plt.subplots(figsize=(10, 6))
+
+#Plot Head (H) vs Flow Rate (Q) on the left Y-axis
+ax1.plot(flow_rate_new, head_new, 'b-o', label='Head (1.2m impeller)')
+ax1.set_xlabel('Flow Rate Q (1.2m impeller) [m³/s]')
+ax1.set_ylabel('Head (m)', color='blue')
+ax1.tick_params(axis='y', labelcolor='blue')
+
+#Plot Total Head Loss on the same Y-axis as Head
+ax1.plot(flow_rate_new, total_head_loss_new, 'g-o', label='Total Head Loss (Pipe, given)')
+
+#Create a second Y-axis for Efficiency
+ax2 = ax1.twinx()
+ax2.plot(flow_rate_new, efficiency_new, 'r-o', label='Efficiency (%)')
+ax2.set_ylabel('Efficiency (%)', color='red')
+ax2.tick_params(axis='y', labelcolor='red')
+
+Combine legends and stack them vertically
+fig.legend(loc='center', bbox_to_anchor=(0.5, 0.5), ncol=1)
+
+#Add Title
+fig.suptitle('Pump Characteristic Curve with Total Head Loss for 1.2m Impeller, N=800 RPM')
+
+#Grid and Layout
+plt.grid()
+plt.tight_layout()
+plt.show()
+
+*******************
+import matplotlib.pyplot as plt
+import numpy as np
+
+# Given data from the pump performance curve
+flow_rate_q = np.array([0.0000, 0.4424, 0.8847, 1.3271, 1.7695, 2.2118, 2.6542, 
+                        3.0828, 3.5251, 3.9675, 4.4099, 4.8522, 5.2946])
+pump_head_h = np.array([393.629, 406.782, 415.237, 419.934, 410.539, 406.782, 
+                        393.629, 378.598, 362.628, 335.383, 306.261, 262.106, 218.892])  # No scaling
+efficiency = np.array([0, 13, 25, 35, 44, 48, 51, 53, 54, 55, 53, 50, 45])  # Efficiency in %
+
+# System demand of 100,000 m³ in 8 hours
+demand_flow_rate = 100000 / (8 * 3600)  # Convert to m³/s
+
+# Initial static head (vertical lift or initial head loss)
+static_head = 100  # This is the Hvert ΔZ from the provided data
+
+# Approximate head loss coefficient K using demand flow rate
+closest_index = np.argmin(np.abs(flow_rate_q - demand_flow_rate))
+approx_system_head = pump_head_h[closest_index]
+
+# Calculate K such that the system curve goes through the point (demand_flow_rate, approx_system_head)
+K = (approx_system_head - static_head) / (demand_flow_rate ** 2)
+
+# Calculate the system head for each flow rate using the system curve formula
+system_head_h = static_head + K * flow_rate_q**2
+
+# Finding the duty point (intersection of the pump curve and system curve)
+duty_point_index = np.argmin(np.abs(pump_head_h - system_head_h))
+duty_flow_rate = flow_rate_q[duty_point_index]
+duty_head = pump_head_h[duty_point_index]
+duty_efficiency = efficiency[duty_point_index]
+
+# Plotting
+fig, ax1 = plt.subplots(figsize=(10, 6))
+
+# Plot Pump Performance Curve and System Curve
+ax1.plot(flow_rate_q, pump_head_h, 'o-', color='blue', label="Pump Performance Curve")
+ax1.plot(flow_rate_q, system_head_h, 'o--', color='green', label="System Curve (Demand-based)")
+
+# Mark the Duty Point on the graph
+ax1.plot(duty_flow_rate, duty_head, 'o', color='purple', markersize=8, label="Duty Point")
+ax1.annotate(f"Duty Point\nQ={duty_flow_rate:.2f} m³/s\nH={duty_head:.2f} m\nEfficiency={duty_efficiency}%",
+             xy=(duty_flow_rate, duty_head), xytext=(duty_flow_rate + 0.5, duty_head + 20),
+             arrowprops=dict(facecolor='black', arrowstyle="->"))
+
+# Set labels and title for the primary y-axis
+ax1.set_xlabel("Flow Rate Q [m³/s]")
+ax1.set_ylabel("Head (m)")
+ax1.set_title("Pump Performance Curve, System Curve, and Efficiency with Duty Point")
+
+# Add secondary y-axis for efficiency
+ax2 = ax1.twinx()
+ax2.plot(flow_rate_q, efficiency, 's-', color='red', label="Efficiency (%)")
+ax2.set_ylabel("Efficiency (%)")
+
+# Add legends for both y-axes
+ax1.legend(loc="upper left")
+ax2.legend(loc="upper right")
+
+plt.grid(True)
+plt.show()
