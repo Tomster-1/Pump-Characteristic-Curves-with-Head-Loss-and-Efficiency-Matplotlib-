@@ -4,14 +4,14 @@ This repository contains a Python script that plots pump performance characteris
 
 Features:
 
-Head–flow (H–Q) characteristic curve
+- Head–flow (H–Q) characteristic curve
 
-System total head loss plotted on the same axis as pump head
+- System total head loss plotted on the same axis as pump head
 
-Pump efficiency plotted on a secondary y-axis
+- Pump efficiency plotted on a secondary y-axis
 
-Combined, vertically stacked legend for clarity
+- Combined, vertically stacked legend for clarity
 
-Clear labelling suitable for engineering reports and coursework
+- Clear labelling suitable for engineering reports and coursework
 
-The script is intended for engineering analysis and coursework visualisation, demonstrating how pump curves intersect with system losses to identify operating points.
+- The script is intended for engineering analysis and coursework visualisation, demonstrating how pump curves intersect with system losses to identify operating points.
